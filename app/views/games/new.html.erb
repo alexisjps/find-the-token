@@ -1,0 +1,112 @@
+<div class="container">
+  <h1>Mastermind AS WEB Défi</h1>
+  <% if @game.secret_code != @game.user_guesses %>
+    <p>Temps écoulé : <%= "%02d" % @elapsed_time[:minutes] %>:<%= "%02d" % @elapsed_time[:seconds] %></p>
+    <p>Nombre de tentatives : <%= @attempts %></p>
+  <% end %>
+
+  <% if flash[:alert] %>
+    <div class="flash-message alert alert-danger">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <% if flash[:notice] %>
+    <div class="flash-message alert alert-success">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+
+  <%= simple_form_for(@game, local: true, html: {autocomplete: "off"}) do |f| %>
+    <%= f.input :user_guesses, label: "Entrez votre proposition (4 chiffres) :", input_html: {oninput: "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4)"} %>
+    <%= f.hidden_field :secret_code, value: @game.secret_code %>
+    <%= f.hidden_field :attempts, value: @game.attempts %>
+    <%= f.button :submit, class: "btn-primary" %>
+  <% end %>
+
+  <div class="modal fade" id="rulesModal" tabindex="-1" aria-labelledby="rulesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rulesModalLabel">Règles et fonctionnement du jeu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Le but du jeu Mastermind est de deviner un code secret composé de 4 chiffres. Chaque chiffre peut aller de 1 à 9.
+            À chaque tentative, vous devez soumettre une combinaison de 4 chiffres. Après chaque soumission, vous recevrez un indice pour vous aider à trouver le code secret.
+          </p>
+          <p>
+            L'indice se compose de symboles "+" et "-" :
+            <ul>
+              <li>Un symbole "+" indique qu'un chiffre de votre proposition est correct et est à la bonne position.</li>
+              <li>Un symbole "-" indique qu'un chiffre de votre proposition est correct mais est à la mauvaise position.</li>
+            </ul>
+          </p>
+          <p>
+            Le jeu continue jusqu'à ce que vous trouviez le code secret. Le nombre de tentatives pour trouver le code secret sera affiché à chaque étape.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let startTime = <%= session[:start_time].to_f * 1000 %>;
+    let timerElement = document.getElementById("timer");
+
+    function updateTimer() {
+      let currentTime = new Date().getTime();
+      let elapsedTime = currentTime - startTime;
+
+      let minutes = Math.floor(elapsedTime / (1000 * 60));
+      let seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+
+      timerElement.textContent = "Temps écoulé : " + minutes + ":" + seconds;
+    }
+
+    setInterval(updateTimer, 1000);
+
+    let rulesModal = new bootstrap.Modal(document.getElementById('rulesModal'));
+    rulesModal.show();
+  });
+
+  document.addEventListener('turbo:load', function () {
+    let alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function (alert) {
+      setTimeout(function () {
+        alert.style.display = 'none';
+      }, 5000);
+    });
+
+    let attemptsElement = document.getElementById("attempts");
+    if (attemptsElement) {
+      let attempts = attemptsElement.textContent;
+      let successMessage = document.getElementById("successMessage");
+      if (successMessage) {
+        let successText = successMessage.textContent;
+        successText = successText.replace("en tentatives.", `en ${attempts} tentatives.`);
+        successMessage.textContent = successText;
+      }
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    let rulesModalElement = document.getElementById('rulesModal');
+    rulesModalElement.addEventListener('hidden.bs.modal', function () {
+      let modalBackdrop = document.querySelector('.modal-backdrop');
+      if (modalBackdrop) {
+        modalBackdrop.remove();
+      }
+    });
+  });
+</script>
