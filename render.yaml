@@ -3,7 +3,7 @@ services:
     name: Token find
     env: ruby
     buildCommand: "bundle install && yarn install && bundle exec rails assets:precompile"
-    runCommand: "bundle exec rails db:migrate && bundle exec rails server -p 5000 -b 0.0.0.0"
+    runCommand: "bundle exec rails db:migrate && bundle exec puma -t 5:5 -p ${PORT:-3000} -e ${RACK_ENV:-development}"
     envVars:
       - key: RAILS_ENV
         value: production
