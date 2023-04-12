@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: my-rails-app
+    name: Token find
     env: ruby
     buildCommand: "bundle install && yarn install && bundle exec rails assets:precompile"
     runCommand: "bundle exec rails db:migrate && bundle exec rails server -p 5000 -b 0.0.0.0"
@@ -8,6 +8,6 @@ services:
       - key: RAILS_ENV
         value: production
       - key: DATABASE_URL
-        value: your_database_url
+        fromEnvVar: DATABASE_URL
       - key: SECRET_KEY_BASE
-        value: your_secret_key_base
+        fromEnvVar: SECRET_KEY_BASE
