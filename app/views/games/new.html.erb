@@ -1,9 +1,13 @@
 <div class="container">
   <h1>Mastermind AS WEB Défi</h1>
-  <% if @game.secret_code != @game.user_guesses %>
+<% if @game.secret_code != @game.user_guesses %>
+  <% if @elapsed_time.present? %>
     <p>Temps écoulé : <%= "%02d" % @elapsed_time[:minutes] %>:<%= "%02d" % @elapsed_time[:seconds] %></p>
-    <p>Nombre de tentatives : <%= @attempts %></p>
+  <% else %>
+    <p>Temps écoulé : --:--</p>
   <% end %>
+  <p>Nombre de tentatives : <%= @attempts %></p>
+<% end %>
 
   <% if flash[:alert] %>
     <div class="flash-message alert alert-danger">
@@ -16,7 +20,15 @@
       <%= flash[:notice] %>
     </div>
   <% end %>
-
+<% if @game.errors.any? %>
+    <div class="alert alert-danger">
+      <ul>
+        <% @game.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+<% end %>
   <%= simple_form_for(@game, local: true, html: {autocomplete: "off"}) do |f| %>
     <%= f.input :user_guesses, label: "Entrez votre proposition (4 chiffres) :", input_html: {oninput: "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4)"} %>
     <%= f.hidden_field :secret_code, value: @game.secret_code %>

@@ -28,10 +28,3 @@ development:
 test:
   <<: *default
   database: find_the_token_test
-
-production:
-  <<: *default
-  database: find_the_token_production
-  url: <%= ENV['DATABASE_URL'] %>
-  username: find_the_token
-  password: <%= ENV["FIND_THE_TOKEN_DATABASE_PASSWORD"] %>
